@@ -230,32 +230,16 @@ update_all_components() {
 
     TMP_FILE="$(mktemp)"
 
-    # Update markdown files
     while IFS= read -r -d '' file; do
         if update_component "$file" "$install_dir"; then
             updated=$((updated + 1))
         else
             failed=$((failed + 1))
         fi
-    done < <(find "$install_dir" -name "*.md" -type f -print0)
-
-    # Update TypeScript files
-    while IFS= read -r -d '' file; do
-        if update_component "$file" "$install_dir"; then
-            updated=$((updated + 1))
-        else
-            failed=$((failed + 1))
-        fi
-    done < <(find "$install_dir" -name "*.ts" -type f -not -path "*/node_modules/*" -print0)
-
-    # Update shell scripts inside install dir
-    while IFS= read -r -d '' file; do
-        if update_component "$file" "$install_dir"; then
-            updated=$((updated + 1))
-        else
-            failed=$((failed + 1))
-        fi
-    done < <(find "$install_dir" -name "*.sh" -type f -print0)
+    done < <(find "$install_dir" \
+        -type f \( -name "*.md" -o -name "*.ts" -o -name "*.sh" \) \
+        -not -path "*/node_modules/*" \
+        -print0)
 
     print_info "Updated: $updated | Skipped (local-only): $COUNT_LOCAL_ONLY | Failed: $failed"
 }
